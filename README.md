@@ -6,9 +6,6 @@ A chat model can only hold so much at once. When a chat gets too long, the
 program cuts it down. It reads the old messages. It writes a short note about
 them. Then it drops the old messages. We call each cut a **fold**.
 
-Think of a backpack. You can only fit so much. So you fold the papers. Folding
-saves room. But sometimes a paper falls out. And nobody says a paper fell out.
-
 Programs that fold chats make three promises:
 
 1. Nothing is lost.
