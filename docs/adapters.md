@@ -7,13 +7,15 @@ through the `Recorder`. Nothing about the backend's internals is trusted.
 export interface Backend {
   name: string;
   turn(content: string): Promise<string>;
-  coverage(): Coverage;          // { total, verbatim, folded, lost, doubleCounted }
+  coverage(): Coverage;           // { total, verbatim, folded, lost, doubleCounted }
+  foldLedger(): FoldRecord[];     // per-fold evidence: span, tokens, cost, preservation
+  promptRecords(): PromptRecord[]; // every prompt actually sent, with cache arithmetic
   recall(query: string): string[];
-  prompt(): Message[];           // what the model would actually receive
+  prompt(): Message[];            // what the model would actually receive
   folds(): number;
   reflections(): number;
   tokensSaved(): number;
-  settled(): Promise<void>;      // drain in-flight fold jobs
+  settled(): Promise<void>;       // drain in-flight fold jobs
 }
 ```
 
