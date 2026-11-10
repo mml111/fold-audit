@@ -115,10 +115,12 @@ check('s1 overlappingClaims', goodResult.coverage.overlappingShadowedClaims, 0);
 check('s1 shadowedStillPresent', goodResult.coverage.shadowedSeqsStillOnSurface, 0);
 check('s1 gapTurns', goodResult.coverage.turnsNeitherPresentNorCovered, 0);
 check('s1 pruneNetSaving', goodFold('prune').netSaving, pruneTokens - prunedReplacement);
-check('s1 pruneCacheCost', goodFold('prune').cacheCost, 400 - 100);
-check('s1 pruneNested', goodFold('prune').nested, (pruneTokens - prunedReplacement) <= 300);
+// `inputTokens` is already the fresh (uncached) input, so the re-prefill a fold
+// forces is the whole inputTokens of the next request, not input minus cacheRead.
+check('s1 pruneCacheCost', goodFold('prune').cacheCost, 400);
+check('s1 pruneNested', goodFold('prune').nested, 400 >= (pruneTokens - prunedReplacement));
 check('s1 summaryNetSaving', goodFold('summary').netSaving, 2000 - summaryTokens);
-check('s1 summaryCacheCost', goodFold('summary').cacheCost, 900 - 300);
+check('s1 summaryCacheCost', goodFold('summary').cacheCost, 900);
 check('s1 summariserInput', goodFold('summary').summariserInputTokens, 2000);
 check('s1 totalNetSaving', goodResult.netSaving.totalNetSaving, (pruneTokens + 2000) - (prunedReplacement + summaryTokens));
 check('s1 pruneReplacementSeq', goodFold('prune').replacementSeq, 6);
@@ -134,7 +136,7 @@ const expensive = await run([
 ], 's2');
 const s2Fold = expensive.result.ledger[0];
 check('s2 netSaving', s2Fold.netSaving, 1000 - estimateMessage({ role: 'user', content: [{ type: 'text', text: 'b'.repeat(3600) }] }));
-check('s2 cacheCost', s2Fold.cacheCost, 1500 - 300);
+check('s2 cacheCost', s2Fold.cacheCost, 1500);
 check('s2 nested', s2Fold.nested, true);
 check('s2 nestedCount', expensive.result.nestedPasses.count, 1);
 check('s2 coverageGapNodes', expensive.result.coverage.surfaceNodesUnaccounted, 0);

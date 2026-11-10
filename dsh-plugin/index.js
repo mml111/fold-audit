@@ -136,6 +136,7 @@ function readUsage(usage) {
     inputTokens: finite(usage.inputTokens),
     outputTokens: finite(usage.outputTokens),
     cacheReadTokens: finite(usage.cacheReadTokens),
+    cacheWriteTokens: finite(usage.cacheWriteTokens),
   };
 }
 
@@ -200,10 +201,13 @@ function scoreFold(fold, usageRecords, threshold) {
   const netSaving = fold.shadowedTokens - replacementTokens;
   let cacheCost = null;
   let cacheRequestSeq = null;
-  for (const [seq, inputTokens, cacheReadTokens] of usageRecords) {
+  for (const [seq, inputTokens, cacheReadTokens, cacheWriteTokens] of usageRecords) {
     if (seq <= fold.seq) continue;
     if (inputTokens === null) continue;
-    cacheCost = inputTokens - (cacheReadTokens ?? 0);
+    // The provider's identity is total = input + output + cacheRead + cacheWrite,
+    // so `inputTokens` is ALREADY the fresh, uncached part of the prompt.
+    // Subtracting cacheRead from it double-counts and can go negative.
+    cacheCost = inputTokens + (cacheWriteTokens ?? 0);
     cacheRequestSeq = seq;
     break;
   }
@@ -364,7 +368,7 @@ export function apply(ctx, config) {
         return {
           ...state,
           usageRecords: state.usageRecords.length < MAX_USAGE_RECORDS
-            ? [...state.usageRecords, [event.seq, usage.inputTokens, usage.cacheReadTokens]]
+            ? [...state.usageRecords, [event.seq, usage.inputTokens, usage.cacheReadTokens, usage.cacheWriteTokens]]
             : state.usageRecords,
           usageCount: state.usageCount + 1,
           usageDetailDropped: state.usageRecords.length >= MAX_USAGE_RECORDS ? state.usageDetailDropped + 1 : state.usageDetailDropped,
@@ -446,10 +450,12 @@ export function apply(ctx, config) {
             ? `, but ${coverage.surfaceNodesUnaccounted} surface node(s) were removed without any fold claiming them (seqs ${coverage.unaccountedSeqsSample.join(', ')}).`
             : '.')
         : `${state.foldCount} fold(s) shadowed ${coverage.surfaceNodesShadowedByFolds} surface node(s) of ${coverage.surfaceNodesEverPlaced} ever placed, removing ${state.shadowedTokenTotal} and leaving ${state.replacementTokenTotal} heuristic tokens (net ${state.shadowedTokenTotal - state.replacementTokenTotal}). `
-          + `${costKnown} of the ${Math.min(state.foldCount, MAX_FOLDS)} recorded folds have a measurable next-request cache cost: ${perFoldCacheCost} summed per fold, ${distinctCacheCost} across ${distinctCache.size} distinct requests; ${nested} folds saved no more than they cost. `
-          + (state.shadowedTokenTotal - state.replacementTokenTotal >= distinctCacheCost
-            ? 'Compaction is cost-honest overall: net saving exceeds re-prefill. '
-            : `Compaction costs more than it removes overall: ${distinctCacheCost} re-prefill against ${state.shadowedTokenTotal - state.replacementTokenTotal} saved. `)
+          + `${costKnown} of the ${state.foldCount} recorded folds have a measurable next-request cache cost: ${perFoldCacheCost} summed per fold, ${distinctCacheCost} across ${distinctCache.size} distinct requests; ${nested} folds saved no more than they cost. `
+          + (costKnown === 0
+            ? 'No assistant usage was recorded after any fold, so cache cost is unknown here — not zero. '
+            : (state.shadowedTokenTotal - state.replacementTokenTotal >= distinctCacheCost
+              ? 'Compaction is cost-honest overall: net saving exceeds measured re-prefill. '
+              : `Compaction costs more than it removes overall: ${distinctCacheCost} re-prefill against ${state.shadowedTokenTotal - state.replacementTokenTotal} saved. `))
           + (coverage.surfaceNodesRewrittenWithoutShadowPrice > 0
             ? `${coverage.surfaceNodesRewrittenWithoutShadowPrice} surface node(s) were rewritten without a shadow-price event (prompt updates); they are not counted as losses. `
             : '')
@@ -481,7 +487,10 @@ export function apply(ctx, config) {
           property: 'tokensSaved >= rePrefill - newContent',
           totalNetSaving: state.shadowedTokenTotal - state.replacementTokenTotal,
           distinctCacheCost,
-          honest: state.shadowedTokenTotal - state.replacementTokenTotal >= distinctCacheCost,
+          measured: costKnown > 0,
+          honest: costKnown > 0
+            ? state.shadowedTokenTotal - state.replacementTokenTotal >= distinctCacheCost
+            : null,
         },
         nestedPasses: { count: nested, folds: ledger.filter((fold) => fold.nested) },
         ledger,
