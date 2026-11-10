@@ -13,3 +13,4 @@ results/*.json
 !results/long-run.json
 !results/selfcheck.json
 !results/mastra-summary.json
+.git-gh-cred.sh
