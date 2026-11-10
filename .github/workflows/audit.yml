@@ -19,3 +19,7 @@ jobs:
       # The Mastra adapter is a finding, not a passing test: it is expected to
       # fail the audit. CI only checks that it runs and reports.
       - run: node --experimental-strip-types tests/mastra.test.ts
+      # The corpus artifact is a snapshot of real sessions. CI cannot re-derive
+      # it (there are no session logs here), but it can prove the published
+      # numbers are internally consistent and carry no host paths.
+      - run: node --experimental-strip-types tests/corpus.test.ts
