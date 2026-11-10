@@ -178,8 +178,22 @@ out of order, count it. Do not hide it. Full statement:
 
 ## Real sessions, not just fake ones
 
-`scripts/fold-audit-from-log.mjs` runs the same counts on real data. A 26,596
-event log with 290 folds gave:
+We ran the counts on every chat log saved on one machine. There were 308 logs.
+119 of them had folds. In those 119:
+
+```
+5,500 fold operations removed 68,098,741 tokens net.
+The next requests had to re-read 216,587,032 tokens.
+88.2% of folds cost at least as much as they saved.
+96 of 118 chats ended up worse off than if they had never folded.
+0 pieces of chat vanished without a fold saying it was gone.
+```
+
+That last line is the good news. Nothing went missing. The problem is cost. The
+program folds a lot, and most folds cost more in re-reading than they save in
+room.
+
+One chat log, 26,595 events and 290 folds, up close:
 
 ```
 290 folds shadowed 10,391 surface nodes of 10,460 ever placed,

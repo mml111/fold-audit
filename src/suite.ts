@@ -67,7 +67,7 @@ export async function audit(
     backend: backend.name,
     runs: session.length,
     window: opts.window,
-    turns: cov.total,
+    turnUnits: cov.total,
     peakPromptTokens: rec.peak("main"),
     peakAuxPromptTokens: Math.max(0, rec.peak("observer"), rec.peak("reflector")),
     finalPromptTokens: counter.countMessages(final),

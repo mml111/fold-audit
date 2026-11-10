@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-10T13:07:35.684Z",
+  "generated": "2026-11-10T16:18:12.021Z",
   "window": 600000,
   "turns": 3000,
   "turnTokens": 1000,
@@ -8,7 +8,7 @@
       "backend": "no-compaction (baseline)",
       "runs": 3000,
       "window": 600000,
-      "turns": 6002,
+      "turnUnits": 6002,
       "peakPromptTokens": 3320137,
       "peakAuxPromptTokens": 0,
       "finalPromptTokens": 3320141,
@@ -21045,7 +21045,7 @@
           "passed": true,
           "measured": 0,
           "threshold": 0,
-          "detail": "0 of 6002 turns are neither verbatim, folded, nor addressable"
+          "detail": "0 of undefined turns are neither verbatim, folded, nor addressable"
         },
         {
           "id": "window_discipline",
@@ -21093,7 +21093,7 @@
       "backend": "naive-sketch (negative control)",
       "runs": 3000,
       "window": 600000,
-      "turns": 6002,
+      "turnUnits": 6002,
       "peakPromptTokens": 632313,
       "peakAuxPromptTokens": 385686,
       "finalPromptTokens": 313176,
@@ -42285,7 +42285,7 @@
           "passed": false,
           "measured": 161,
           "threshold": 0,
-          "detail": "161 of 6002 turns are neither verbatim, folded, nor addressable"
+          "detail": "161 of undefined turns are neither verbatim, folded, nor addressable"
         },
         {
           "id": "window_discipline",
@@ -42333,7 +42333,7 @@
       "backend": "buffered-stitcher (reference)",
       "runs": 3000,
       "window": 600000,
-      "turns": 6002,
+      "turnUnits": 6002,
       "peakPromptTokens": 331888,
       "peakAuxPromptTokens": 331888,
       "finalPromptTokens": 54203,
@@ -96285,7 +96285,7 @@
           "passed": true,
           "measured": 0,
           "threshold": 0,
-          "detail": "0 of 6002 turns are neither verbatim, folded, nor addressable"
+          "detail": "0 of undefined turns are neither verbatim, folded, nor addressable"
         },
         {
           "id": "window_discipline",
@@ -96333,7 +96333,7 @@
       "backend": "buffered-stitcher, cold prefix (variant)",
       "runs": 3000,
       "window": 600000,
-      "turns": 6002,
+      "turnUnits": 6002,
       "peakPromptTokens": 331888,
       "peakAuxPromptTokens": 303040,
       "finalPromptTokens": 54203,
@@ -150285,7 +150285,7 @@
           "passed": true,
           "measured": 0,
           "threshold": 0,
-          "detail": "0 of 6002 turns are neither verbatim, folded, nor addressable"
+          "detail": "0 of undefined turns are neither verbatim, folded, nor addressable"
         },
         {
           "id": "window_discipline",

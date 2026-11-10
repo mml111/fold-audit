@@ -48,7 +48,10 @@ export interface AuditReport {
   backend: string;
   runs: number;
   window: number;
-  turns: number;
+  /** Coverage units. One unit is one conversation step placed on the surface
+   *  (a user turn and its reply), so a run of 3,000 turns yields ~6,000 units.
+   *  Named `turnUnits`, not `turns`, so the number is never read as a turn count. */
+  turnUnits: number;
   peakPromptTokens: number;
   peakAuxPromptTokens: number;
   finalPromptTokens: number;
@@ -93,7 +96,7 @@ export function score(report: AuditReport): number {
 export function format(report: AuditReport): string {
   const lines: string[] = [];
   lines.push(`backend: ${report.backend}`);
-  lines.push(`  window ${report.window.toLocaleString()} | turns ${report.turns.toLocaleString()}`);
+  lines.push(`  window ${report.window.toLocaleString()} | units ${report.turnUnits.toLocaleString()}`);
   lines.push(`  peak prompt ${report.peakPromptTokens.toLocaleString()} | folds ${report.foldCount}`);
   for (const p of report.properties) {
     lines.push(
