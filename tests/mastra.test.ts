@@ -159,9 +159,24 @@ if (backend!.folds() === 0) {
   process.exit(1);
 }
 
-const failed = report.properties.filter((p) => !p.passed);
-if (failed.length > 0) {
-  console.error("\nFAILED PROPERTIES: " + failed.map((p) => p.id).join(", "));
+// Mastra's OM is *expected* to fail three of the six properties. That failure is
+// the finding, not a CI error. What CI must guarantee is that the finding still
+// reproduces: the plumbing runs, nothing is lost, and the same three properties
+// fail. If the failed set changes, something moved in Mastra and we must know.
+const expectedFailures = ["convergence", "cost_honesty", "window_discipline"];
+const coverage = backend!.coverage();
+if (coverage.lost > 0) {
+  console.error(`\nFAIL: ${coverage.lost} turn(s) are neither in the prompt nor covered by a fold`);
   process.exit(1);
 }
-console.log("\nall six properties passed");
+
+const failed = report.properties.filter((p) => !p.passed).map((p) => p.id).sort();
+if (JSON.stringify(failed) !== JSON.stringify(expectedFailures)) {
+  console.error(
+    "\nFAIL: the documented Mastra finding did not reproduce.\n" +
+    `  expected failing properties: ${expectedFailures.join(", ")}\n` +
+    `  actual failing properties:   ${failed.join(", ") || "(none)"}`
+  );
+  process.exit(1);
+}
+console.log("\nfinding reproduced: OM ran, lost nothing, and failed the same three properties as documented");
