@@ -148,11 +148,11 @@ Live in the session that installed it (`1b7423b8-…`, 19 folds: 18 prunes and o
 summary):
 
 ```
-19 fold(s) shadowed 302 surface node(s) of 521 ever placed, removing 292089 and
+19 fold(s) shadowed 302 surface node(s) of 590 ever placed, removing 292089 and
 leaving 27855 heuristic tokens (net 264234). 19 of the 19 recorded folds have a
-measurable next-request cache cost: 6085171 summed per fold, 1160748 across 4
-distinct requests; 18 folds saved no more than they cost. Compaction costs more
-than it removes overall: 1160748 re-prefill against 264234 saved. No coverage
+measurable next-request cache cost: 6232627 summed per fold, 1209900 across 4
+distinct requests; 19 folds saved no more than they cost. Compaction costs more
+than it removes overall: 1209900 re-prefill against 264234 saved. No coverage
 gap: every turn is either present or covered by a fold.
 ```
 

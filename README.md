@@ -190,14 +190,13 @@ removing 8,395,668 tokens and leaving 756,747 (net 7,638,921).
 A shorter live session, 19 folds:
 
 ```
-302 of 582 surface nodes shadowed, 292,089 removed, 27,855 left (net 264,234).
-Re-prefill across the 4 distinct requests that followed: 1,160,748.
-18 of 19 folds are nested passes. Batched: honest = false.
+302 of 590 surface nodes shadowed, 292,089 removed, 27,855 left (net 264,234).
+Re-prefill across the 4 distinct requests that followed: 1,209,900.
+19 of 19 folds are nested passes. Batched: honest = false.
 ```
 
-One fold that replaced 284 nodes at once was the only one in that session whose
-saving matched its cost. The other 18 small folds each removed about 2,000
-tokens and forced a re-read a hundred times bigger.
+Every fold in that session cost more than it saved. The folds that removed
+about 2,000 tokens each forced a re-read tens of times larger.
 
 Read the cost number as a **safe upper bound**. We charge a fold for the whole
 next request that had to be re-read. Some of that re-read would have happened
