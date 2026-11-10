@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Fold Audit",
+    "description": "Reads the session's own compaction log and reports coverage, net token saving, re-prefill cache cost, and folds that saved less than they cost. Exposes the fold_audit tool; changes nothing."
+  }
+}

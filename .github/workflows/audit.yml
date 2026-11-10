@@ -1,0 +1,16 @@
+name: audit
+on:
+  push:
+  pull_request:
+jobs:
+  selfcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install
+      - run: node --experimental-strip-types tests/suite.test.ts
+      - run: node --experimental-strip-types src/cli.ts --backends baseline,naive,reference,reference-cold --window 600000 --turns 3000 --turnTokens 1000 --giant 300000 --report results/ci.json
+      - run: node --experimental-strip-types tests/mastra.test.ts

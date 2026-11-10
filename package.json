@@ -1,0 +1,18 @@
+{
+  "name": "fold-audit",
+  "version": "0.1.0",
+  "description": "A conformance harness for context compaction: turns 'lossless', 'independent' and 'cache-friendly' into measured arithmetic.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.6"
+  },
+  "scripts": {
+    "audit": "node --experimental-strip-types src/cli.ts",
+    "selfcheck": "node --experimental-strip-types src/cli.ts --backends naive,reference --report results/selfcheck.json"
+  },
+  "dependencies": {
+    "@mastra/core": "^1.82.0",
+    "@mastra/memory": "^1.41.0"
+  }
+}

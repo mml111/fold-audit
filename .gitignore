@@ -1,0 +1,15 @@
+node_modules/
+.probe*.mjs
+.dbg*.mjs
+*.log
+
+# Raw run dumps are large and not the reproducible evidence.
+# The committed artifacts are the seven named files below.
+results/*.json
+!results/matrix.json
+!results/small-window.json
+!results/tight-window.json
+!results/stress.json
+!results/long-run.json
+!results/selfcheck.json
+!results/mastra-summary.json

@@ -1,0 +1,296 @@
+{
+  "generated": "2026-11-09T17:20:29.722Z",
+  "window": 600000,
+  "turns": 1200,
+  "turnTokens": 1000,
+  "reports": [
+    {
+      "backend": "no-compaction (baseline)",
+      "runs": 1200,
+      "window": 600000,
+      "turns": 2400,
+      "peakPromptTokens": 1207535,
+      "finalPromptTokens": 1207539,
+      "folds": 0,
+      "reflections": 0,
+      "observerCalls": 0,
+      "silentLoss": 0,
+      "doubleCounted": 0,
+      "anchorsSeeded": 1372,
+      "anchorsSurviving": 1372,
+      "prefixRewrites": 0,
+      "rePrefillTokens": 1207535,
+      "cacheReadTokens": 723825463,
+      "newContentTokens": 1226734,
+      "tokensSaved": 0,
+      "wallSeconds": null,
+      "effectiveTps": 0,
+      "properties": [
+        {
+          "id": "no_silent_loss",
+          "name": "No silent loss",
+          "passed": true,
+          "measured": 0,
+          "threshold": 0,
+          "detail": "0 of 2400 turns are neither verbatim, folded, nor addressable"
+        },
+        {
+          "id": "window_discipline",
+          "name": "Window discipline",
+          "passed": false,
+          "measured": 1207535,
+          "threshold": 600000,
+          "detail": "largest prompt sent was 1,207,535 tokens against a 600,000 window"
+        },
+        {
+          "id": "convergence",
+          "name": "Convergence",
+          "passed": false,
+          "measured": 1207539,
+          "threshold": 450000,
+          "detail": "after 0 folds the context settled at 1,207,539 tokens"
+        },
+        {
+          "id": "race_safety",
+          "name": "Race safety",
+          "passed": true,
+          "measured": 0,
+          "threshold": 0,
+          "detail": "0 turns double-counted across concurrent folds"
+        },
+        {
+          "id": "anchor_retention",
+          "name": "Anchor retention",
+          "passed": true,
+          "measured": 1372,
+          "threshold": 1372,
+          "detail": "1372 of 1372 seeded verbatim facts still reachable"
+        },
+        {
+          "id": "cost_honesty",
+          "name": "Cost honesty",
+          "passed": true,
+          "measured": 0,
+          "threshold": 0,
+          "detail": "folds saved 0 tokens; prefix rewrites forced 0 extra tokens of re-prefill"
+        }
+      ]
+    },
+    {
+      "backend": "naive-sketch (negative control)",
+      "runs": 1200,
+      "window": 600000,
+      "turns": 2400,
+      "peakPromptTokens": 1207535,
+      "finalPromptTokens": 5044,
+      "folds": 1,
+      "reflections": 0,
+      "observerCalls": 1,
+      "silentLoss": 1625,
+      "doubleCounted": 0,
+      "anchorsSeeded": 1372,
+      "anchorsSurviving": 6,
+      "prefixRewrites": 0,
+      "rePrefillTokens": 1592871,
+      "cacheReadTokens": 723825463,
+      "newContentTokens": 1226734,
+      "tokensSaved": 385326,
+      "wallSeconds": null,
+      "effectiveTps": 0,
+      "properties": [
+        {
+          "id": "no_silent_loss",
+          "name": "No silent loss",
+          "passed": false,
+          "measured": 1625,
+          "threshold": 0,
+          "detail": "1625 of 2400 turns are neither verbatim, folded, nor addressable"
+        },
+        {
+          "id": "window_discipline",
+          "name": "Window discipline",
+          "passed": false,
+          "measured": 1207535,
+          "threshold": 600000,
+          "detail": "largest prompt sent was 1,207,535 tokens against a 600,000 window"
+        },
+        {
+          "id": "convergence",
+          "name": "Convergence",
+          "passed": true,
+          "measured": 5044,
+          "threshold": 450000,
+          "detail": "after 1 folds the context settled at 5,044 tokens"
+        },
+        {
+          "id": "race_safety",
+          "name": "Race safety",
+          "passed": false,
+          "measured": 0,
+          "threshold": 0,
+          "detail": "0 turns double-counted across concurrent folds"
+        },
+        {
+          "id": "anchor_retention",
+          "name": "Anchor retention",
+          "passed": false,
+          "measured": 6,
+          "threshold": 1372,
+          "detail": "6 of 1372 seeded verbatim facts still reachable"
+        },
+        {
+          "id": "cost_honesty",
+          "name": "Cost honesty",
+          "passed": true,
+          "measured": 366137,
+          "threshold": 385326,
+          "detail": "folds saved 385,326 tokens; prefix rewrites forced 366,137 extra tokens of re-prefill"
+        }
+      ]
+    },
+    {
+      "backend": "buffered-stitcher (reference)",
+      "runs": 1200,
+      "window": 600000,
+      "turns": 2400,
+      "peakPromptTokens": 30996,
+      "finalPromptTokens": 26581,
+      "folds": 788,
+      "reflections": 0,
+      "observerCalls": 788,
+      "silentLoss": 0,
+      "doubleCounted": 0,
+      "anchorsSeeded": 1372,
+      "anchorsSurviving": 1372,
+      "prefixRewrites": 0,
+      "rePrefillTokens": 1952394,
+      "cacheReadTokens": 34429681,
+      "newContentTokens": 1226734,
+      "tokensSaved": 1189273,
+      "wallSeconds": null,
+      "effectiveTps": 0,
+      "properties": [
+        {
+          "id": "no_silent_loss",
+          "name": "No silent loss",
+          "passed": true,
+          "measured": 0,
+          "threshold": 0,
+          "detail": "0 of 2400 turns are neither verbatim, folded, nor addressable"
+        },
+        {
+          "id": "window_discipline",
+          "name": "Window discipline",
+          "passed": true,
+          "measured": 30996,
+          "threshold": 600000,
+          "detail": "largest prompt sent was 30,996 tokens against a 600,000 window"
+        },
+        {
+          "id": "convergence",
+          "name": "Convergence",
+          "passed": true,
+          "measured": 26581,
+          "threshold": 450000,
+          "detail": "after 788 folds the context settled at 26,581 tokens"
+        },
+        {
+          "id": "race_safety",
+          "name": "Race safety",
+          "passed": true,
+          "measured": 0,
+          "threshold": 0,
+          "detail": "0 turns double-counted across concurrent folds"
+        },
+        {
+          "id": "anchor_retention",
+          "name": "Anchor retention",
+          "passed": true,
+          "measured": 1372,
+          "threshold": 1372,
+          "detail": "1372 of 1372 seeded verbatim facts still reachable"
+        },
+        {
+          "id": "cost_honesty",
+          "name": "Cost honesty",
+          "passed": true,
+          "measured": 725660,
+          "threshold": 1189273,
+          "detail": "folds saved 1,189,273 tokens; prefix rewrites forced 725,660 extra tokens of re-prefill"
+        }
+      ]
+    },
+    {
+      "backend": "buffered-stitcher, cold prefix (variant)",
+      "runs": 1200,
+      "window": 600000,
+      "turns": 2400,
+      "peakPromptTokens": 30996,
+      "finalPromptTokens": 26581,
+      "folds": 788,
+      "reflections": 0,
+      "observerCalls": 788,
+      "silentLoss": 0,
+      "doubleCounted": 0,
+      "anchorsSeeded": 1372,
+      "anchorsSurviving": 1372,
+      "prefixRewrites": 0,
+      "rePrefillTokens": 2447923,
+      "cacheReadTokens": 25408648,
+      "newContentTokens": 1226734,
+      "tokensSaved": 1189273,
+      "wallSeconds": null,
+      "effectiveTps": 0,
+      "properties": [
+        {
+          "id": "no_silent_loss",
+          "name": "No silent loss",
+          "passed": true,
+          "measured": 0,
+          "threshold": 0,
+          "detail": "0 of 2400 turns are neither verbatim, folded, nor addressable"
+        },
+        {
+          "id": "window_discipline",
+          "name": "Window discipline",
+          "passed": true,
+          "measured": 30996,
+          "threshold": 600000,
+          "detail": "largest prompt sent was 30,996 tokens against a 600,000 window"
+        },
+        {
+          "id": "convergence",
+          "name": "Convergence",
+          "passed": true,
+          "measured": 26581,
+          "threshold": 450000,
+          "detail": "after 788 folds the context settled at 26,581 tokens"
+        },
+        {
+          "id": "race_safety",
+          "name": "Race safety",
+          "passed": true,
+          "measured": 0,
+          "threshold": 0,
+          "detail": "0 turns double-counted across concurrent folds"
+        },
+        {
+          "id": "anchor_retention",
+          "name": "Anchor retention",
+          "passed": true,
+          "measured": 1372,
+          "threshold": 1372,
+          "detail": "1372 of 1372 seeded verbatim facts still reachable"
+        },
+        {
+          "id": "cost_honesty",
+          "name": "Cost honesty",
+          "passed": false,
+          "measured": 1221189,
+          "threshold": 1189273,
+          "detail": "folds saved 1,189,273 tokens; prefix rewrites forced 1,221,189 extra tokens of re-prefill"
+        }
+      ]
+    }
+  ]
+}

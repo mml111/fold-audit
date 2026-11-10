@@ -1,0 +1,6 @@
+- insert:
+    - id: fold-audit
+      name: '@local/fold-audit'
+      config:
+        enabled: true
+        threshold: 1
