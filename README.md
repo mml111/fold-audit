@@ -182,16 +182,26 @@ We ran the counts on every chat log saved on one machine. There were 308 logs.
 119 of them had folds. In those 119:
 
 ```
-5,500 fold operations removed 68,098,741 tokens net.
-The next requests had to re-read 216,587,032 tokens.
+5,503 fold operations removed 68,255,718 tokens net.
+The next requests had to re-read 217,133,383 tokens.
 88.2% of folds cost at least as much as they saved.
 96 of 118 chats ended up worse off than if they had never folded.
 0 pieces of chat vanished without a fold saying it was gone.
 ```
 
+These numbers move a little each time you run them, because the logs are live:
+the machine keeps having conversations while you measure it. Run the script and
+it prints whatever is there right now. The percentages are what stay stable.
+
 That last line is the good news. Nothing went missing. The problem is cost. The
 program folds a lot, and most folds cost more in re-reading than they save in
 room.
+
+There is a second cost people forget. To write a summary, the program has to
+send the old text to a model first. On this machine those summary calls read
+119,037,520 tokens. Add them to the re-reading and the true bill is
+336,170,903 tokens against 68,255,718 saved. On that fuller count, 108 of 118
+chats paid more than they got back.
 
 One chat log, 26,595 events and 290 folds, up close:
 
