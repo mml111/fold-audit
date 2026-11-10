@@ -152,6 +152,9 @@ async function auditOne(file) {
     unaccountedNodes: result.coverage.surfaceNodesUnaccounted,
     netSaving: result.netSaving.totalNetSaving,
     distinctRePrefill: result.cacheCost.distinctCacheCost,
+    summariserInput: result.costHonesty.summariserInput,
+    summariserOutput: result.costHonesty.summariserOutput,
+    totalTokenCost: result.costHonesty.totalTokenCost,
     foldsAtOrAboveCost: result.nestedPasses.count,
     marginalRePrefill: marginalTotal,
     marginalFoldsAtCost: marginalFoldsAtCost,
@@ -189,6 +192,11 @@ console.log("UPPER BOUND (charge a fold for the whole next request's fresh input
 console.log(`  distinct re-prefill:         ${sum(withCostEvidence, "distinctRePrefill").toLocaleString()}`);
 console.log(`  folds costing >= saving:   ${sum(withCostEvidence, "foldsAtOrAboveCost").toLocaleString()} of ${sum(withCostEvidence, "folds").toLocaleString()} (${(100 * sum(withCostEvidence, "foldsAtOrAboveCost") / Math.max(1, sum(withCostEvidence, "folds"))).toFixed(1)}%)`);
 console.log(`  sessions net-negative:     ${withCostEvidence.filter((r) => r.netSaving < r.distinctRePrefill).length} of ${withCostEvidence.length}`);
+console.log("");
+console.log("TOTAL (re-prefill plus the summariser call that produced each fold):");
+console.log(`  summariser input:            ${sum(withFolds, "summariserInput").toLocaleString()}`);
+console.log(`  total cost:                  ${sum(withCostEvidence, "totalTokenCost").toLocaleString()}`);
+console.log(`  sessions net-negative:       ${withCostEvidence.filter((r) => r.netSaving < r.totalTokenCost).length} of ${withCostEvidence.length}`);
 console.log("");
 console.log("MARGINAL (subtract content that was appended between requests anyway):");
 console.log(`  fold-attributable re-prefill: ${sum(withCostEvidence, "marginalRePrefill").toLocaleString()}`);

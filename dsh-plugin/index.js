@@ -447,9 +447,17 @@ export function apply(ctx, config) {
       let perFoldCacheCost = 0;
       let costKnown = 0;
       let nested = 0;
+      let summariserInput = 0;
+      let summariserOutput = 0;
+      let summariserKnown = 0;
       const distinctCache = new Map();
       for (const fold of ledger) {
         totalSaving += fold.netSaving;
+        if (fold.summariserInputTokens !== null) {
+          summariserInput += fold.summariserInputTokens;
+          summariserOutput += fold.summariserOutputTokens ?? 0;
+          summariserKnown += 1;
+        }
         if (fold.cacheCost !== null) {
           perFoldCacheCost += fold.cacheCost;
           distinctCache.set(fold.cacheRequestSeq, fold.cacheCost);
@@ -459,6 +467,10 @@ export function apply(ctx, config) {
       }
       // Distinct total: one request is counted once however many folds preceded it.
       const distinctCacheCost = [...distinctCache.values()].reduce((sum, cost) => sum + cost, 0);
+      // A fold also costs the model call that produced its summary. That call is
+      // not free and is not part of the main prompt, so omitting it understates
+      // the true cost of compaction.
+      const totalTokenCost = distinctCacheCost + summariserInput;
 
       const summary = state.foldCount === 0
         ? `No compaction fold recorded in this session: the surface holds ${coverage.surfaceNodesPresent} node(s) across ${coverage.turnsSeen} turn(s) and nothing has been shadowed`
@@ -469,9 +481,9 @@ export function apply(ctx, config) {
           + `${costKnown} of the ${state.foldCount} recorded folds have a measurable next-request cache cost: ${perFoldCacheCost} summed per fold, ${distinctCacheCost} across ${distinctCache.size} distinct requests; ${nested} folds saved no more than they cost. `
           + (costKnown === 0
             ? 'No assistant usage was recorded after any fold, so cache cost is unknown here — not zero. '
-            : (state.shadowedTokenTotal - state.replacementTokenTotal >= distinctCacheCost
-              ? 'Compaction is cost-honest overall: net saving exceeds measured re-prefill. '
-              : `Compaction costs more than it removes overall: ${distinctCacheCost} re-prefill against ${state.shadowedTokenTotal - state.replacementTokenTotal} saved. `))
+            : (state.shadowedTokenTotal - state.replacementTokenTotal >= totalTokenCost
+              ? `Compaction is cost-honest overall: net saving ${state.shadowedTokenTotal - state.replacementTokenTotal} exceeds total cost ${totalTokenCost} (${distinctCacheCost} re-prefill + ${summariserInput} summariser input). `
+              : `Compaction costs more than it removes overall: ${totalTokenCost} total cost (${distinctCacheCost} re-prefill + ${summariserInput} summariser input) against ${state.shadowedTokenTotal - state.replacementTokenTotal} saved. `))
           + (coverage.surfaceNodesRewrittenWithoutShadowPrice > 0
             ? `${coverage.surfaceNodesRewrittenWithoutShadowPrice} surface node(s) were rewritten without a shadow-price event (prompt updates); they are not counted as losses. `
             : '')
@@ -500,12 +512,16 @@ export function apply(ctx, config) {
           threshold,
         },
         costHonesty: {
-          property: 'tokensSaved >= rePrefill - newContent',
+          property: 'tokensSaved >= rePrefill + summariserInput',
           totalNetSaving: state.shadowedTokenTotal - state.replacementTokenTotal,
           distinctCacheCost,
-          measured: costKnown > 0,
-          honest: costKnown > 0
-            ? state.shadowedTokenTotal - state.replacementTokenTotal >= distinctCacheCost
+          summariserInput,
+          summariserOutput,
+          foldsWithSummariserUsage: summariserKnown,
+          totalTokenCost,
+          measured: costKnown > 0 || summariserKnown > 0,
+          honest: (costKnown > 0 || summariserKnown > 0)
+            ? state.shadowedTokenTotal - state.replacementTokenTotal >= totalTokenCost
             : null,
         },
         nestedPasses: { count: nested, folds: ledger.filter((fold) => fold.nested) },
