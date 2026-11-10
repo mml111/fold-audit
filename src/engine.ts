@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type { AuditReport, PropertyResult } from "./spec.ts";
 
 export interface Message {
@@ -47,8 +48,10 @@ export interface PromptRecord {
   kind: "main" | "observer" | "reflector" | "unknown";
   messages: Message[];
   tokens: number;
-  cachedTokens: number;
-  rePrefillTokens: number;
+  cached: number;
+  rePrefill: number;
+  /** Hash of the leading messages. A change in stamp is a prefix rewrite. */
+  stamp: string;
 }
 
 /**
@@ -79,7 +82,14 @@ export class Recorder {
     }
     const tokens = this.counter.countMessages(messages);
     const rePrefill = Math.max(0, tokens - cached);
-    this.prompts.push({ kind, messages, tokens, cached, rePrefill });
+    this.prompts.push({
+      kind,
+      messages,
+      tokens,
+      cached,
+      rePrefill,
+      stamp: createHash("sha256").update(messages.map((m) => `${m.role}\u0001${m.content}`).join("\u0002")).digest("hex").slice(0, 16),
+    });
     this.totalRePrefill += rePrefill;
     this.totalCacheRead += cached;
     this.slots.push(messages);

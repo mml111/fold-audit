@@ -321,7 +321,7 @@ export class BufferedStitcher implements Backend {
   }
 
   promptRecords(): { kind: string; tokens: number; cached: number; rePrefill: number }[] {
-    return this.rec.prompts.map((p) => ({ kind: p.kind, tokens: p.tokens, cached: p.cached, rePrefill: p.rePrefill }));
+    return this.rec.prompts.map((p) => ({ kind: p.kind, tokens: p.tokens, cached: p.cached, rePrefill: p.rePrefill, stamp: p.stamp }));
   }
 
   foldLedger(): FoldRecord[] {
