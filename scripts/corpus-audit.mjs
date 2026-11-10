@@ -145,12 +145,44 @@ async function auditOne(file) {
     if (m >= fold.netSaving) marginalFoldsAtCost += 1;
   }
 
+  // Window discipline, measured against what the harness actually reserves.
+  // dsh-compaction-basic's resolveCompactSpec sets the message budget to
+  // contextWindow - reservedCompletionTokens, where the reservation is the
+  // request's own maxTokens. Compare the prompt the provider reported against
+  // that budget, and separately against the raw model window.
+  let window = Infinity, maxTokens = Infinity;
+  let judged = 0, overRaw = 0, overBudget = 0, maxRatio = 0;
+  // Compact histogram of prompt size as a share of the declared window, in
+  // 10% buckets. Storing every share would bloat the artifact; buckets are
+  // small and let a reader verify the distribution sums to the request count.
+  const buckets = new Array(11).fill(0);
+  for (const e of events) {
+    if (e.data?.contextWindow) window = e.data.contextWindow;
+    const mt = e.data?.header?.config?.maxTokens ?? e.data?.maxTokens;
+    if (typeof mt === "number") maxTokens = mt;
+    const u = e.data?.usage;
+    if (!u || !isFinite(window)) continue;
+    const prompt = (u.inputTokens ?? 0) + (u.cacheReadTokens ?? 0) + (u.cacheWriteTokens ?? 0);
+    const share = prompt / window;
+    judged += 1;
+    maxRatio = Math.max(maxRatio, share);
+    buckets[Math.min(10, Math.floor(share * 10))] += 1;
+    if (prompt > window) overRaw += 1;
+    const budget = window - (isFinite(maxTokens) ? maxTokens : 0);
+    if (budget > 0 && prompt > budget) overBudget += 1;
+  }
+
   return {
     // No absolute paths and no raw session ids: this script is meant to run on
     // someone else's machine and its output may be committed. A stable short
     // hash is enough to identify a session without exposing its home directory.
     ref: createHash("sha256").update(file).digest("hex").slice(0, 10),
     events: events.length,
+    windowJudged: judged,
+    windowHardViolations: overRaw,
+    windowBudgetMisses: overBudget,
+    maxPromptShareOfWindow: maxRatio,
+    windowShares: buckets,
     folds: result.netSaving.folds,
     shadowedNodes: result.coverage.surfaceNodesShadowedByFolds,
     everPlaced: result.coverage.surfaceNodesEverPlaced,
@@ -209,6 +241,12 @@ console.log(`  folds costing >= saving:   ${sum(withCostEvidence, "marginalFolds
 console.log(`  sessions net-negative:     ${withCostEvidence.filter((r) => r.netSaving < r.marginalRePrefill).length} of ${withCostEvidence.length}`);
 console.log("");
 console.log(`surface nodes removed with no fold claiming them: ${sum(withFolds, "unaccountedNodes").toLocaleString()}`);
+console.log("");
+console.log("WINDOW DISCIPLINE (prompt size against the declared context window):");
+console.log(`  requests judged:               ${sum(withFolds, "windowJudged").toLocaleString()}`);
+console.log(`  prompts over the model window: ${sum(withFolds, "windowHardViolations")}`);
+console.log(`  prompts over the reserved budget: ${sum(withFolds, "windowBudgetMisses")}`);
+console.log(`  largest prompt as a share of its window: ${(Math.max(...withFolds.map((r) => r.maxPromptShareOfWindow ?? 0)) * 100).toFixed(1)}%`);
 
 if (reportPath) {
   fs.writeFileSync(reportPath, JSON.stringify({
@@ -227,6 +265,11 @@ if (reportPath) {
       foldsAtOrAboveCost: sum(withCostEvidence, "foldsAtOrAboveCost"),
       sessionsNetNegative: withCostEvidence.filter((r) => r.netSaving < r.distinctRePrefill).length,
       unaccountedSurfaceNodes: sum(withFolds, "unaccountedNodes"),
+      windowRequestsJudged: sum(withFolds, "windowJudged"),
+      windowHardViolations: sum(withFolds, "windowHardViolations"),
+      windowBudgetMisses: sum(withFolds, "windowBudgetMisses"),
+      largestPromptShareOfWindow: Math.max(...withFolds.map((r) => r.maxPromptShareOfWindow ?? 0)),
+      windowShareHistogram: withFolds.reduce((acc, r) => acc.map((v, i) => v + (r.windowShares?.[i] ?? 0)), new Array(11).fill(0)),
     },
     sessions: withFolds,
     caveats: [

@@ -32,6 +32,9 @@ const AGGREGATE_TO_ROW = {
   distinctRePrefill: "distinctRePrefill",
   foldsAtOrAboveCost: "foldsAtOrAboveCost",
   unaccountedSurfaceNodes: "unaccountedNodes",
+  windowRequestsJudged: "windowJudged",
+  windowHardViolations: "windowHardViolations",
+  windowBudgetMisses: "windowBudgetMisses",
 };
 for (const [aggregate, field] of Object.entries(AGGREGATE_TO_ROW)) {
   const computed = sessions.reduce((a, s) => a + (s[field] ?? 0), 0);
@@ -44,6 +47,25 @@ for (const [aggregate, field] of Object.entries(AGGREGATE_TO_ROW)) {
 const netNegative = sessions.filter((s) => s.netSaving < s.distinctRePrefill).length;
 if (corpus.corpus.sessionsNetNegative !== netNegative) {
   fail(`sessionsNetNegative: ${corpus.corpus.sessionsNetNegative} != ${netNegative} rows below their cost`);
+}
+
+// The largest prompt share is a max over rows, not a sum.
+const maxShare = Math.max(...sessions.map((s) => s.maxPromptShareOfWindow ?? 0));
+if (Math.abs(corpus.corpus.largestPromptShareOfWindow - maxShare) > 1e-9) {
+  fail(`largestPromptShareOfWindow: ${corpus.corpus.largestPromptShareOfWindow} != max of rows ${maxShare}`);
+}
+
+// The window histogram must account for every judged request, in both
+// directions: per row and corpus-wide.
+for (const s of sessions) {
+  const b = s.windowShares ?? [];
+  if (b.reduce((a, v) => a + v, 0) !== s.windowJudged) {
+    fail(`${s.ref}: window histogram sums to ${b.reduce((a, v) => a + v, 0)} but ${s.windowJudged} requests were judged`);
+  }
+}
+const histogramTotal = (corpus.corpus.windowShareHistogram ?? []).reduce((a, v) => a + v, 0);
+if (histogramTotal !== corpus.corpus.windowRequestsJudged) {
+  fail(`windowShareHistogram sums to ${histogramTotal} but ${corpus.corpus.windowRequestsJudged} requests were judged`);
 }
 
 // 3. Every session row is internally consistent.

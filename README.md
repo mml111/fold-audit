@@ -203,6 +203,13 @@ send the old text to a model first. On this machine those summary calls read
 336,170,903 tokens against 68,255,718 saved. On that fuller count, 108 of 118
 chats paid more than they got back.
 
+The good news is about the window. The real program kept its prompts small.
+Across 52,538 requests, 64.8% used less than half the window the model declared,
+and only one request ever went over the window at all. The largest prompt was
+101.4% of its window. The careless sketch in this repo, by contrast, reached
+3,320,137 tokens against a 600,000 window. Real compaction does hold the size
+down. It just does it expensively.
+
 One chat log, 26,595 events and 290 folds, up close:
 
 ```
