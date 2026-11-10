@@ -182,7 +182,7 @@ Against a second real stored session (`3b384f50-…`, 26,595 events, 290 folds):
 290 fold(s) shadowed 10391 surface node(s) of 10460 ever placed, removing
 8395668 and leaving 756747 heuristic tokens (net 7638921). 290 folds have a
 measurable next-request cache cost: 16919470 summed per fold, 10049246 across
-193 distinct requests; 218 folds saved no more than they cost. Compaction costs
+193 distinct requests; 209 folds saved no more than they cost. Compaction costs
 more than it removes overall: 10049246 re-prefill against 7638921 saved.
 5 surface node(s) were rewritten without a shadow-price event (prompt updates);
 they are not counted as losses. No coverage gap: every turn is either present
@@ -190,7 +190,7 @@ or covered by a fold.
 ```
 
 Zero unaccounted nodes, zero overlapping claims: the harness's own shadowing is
-exact. The cost is where it fails — 218 of 290 folds, and the session as a whole,
+exact. The cost is where it fails — 209 of 290 folds, and the session as a whole,
 paid more in re-prefill than it removed.
 
 ## What it cannot measure

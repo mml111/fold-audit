@@ -115,7 +115,7 @@ that always answers the same way.
 
 The point is not that our fake chat is real life. The point is that the counts
 are just math. The same math works on real logs. We ran it on a real session
-with 290 folds. It said: **218 of the 290 folds saved less than they cost.**
+with 290 folds. It said: **209 of the 290 folds saved less than they cost.**
 
 ## Run it
 
@@ -184,7 +184,7 @@ event log with 290 folds gave:
 ```
 290 folds shadowed 10,391 surface nodes of 10,460 ever placed,
 removing 8,395,668 tokens and leaving 756,747 (net 7,638,921).
-218 of 290 folds saved no more than they cost.
+209 of 290 folds saved no more than they cost.
 ```
 
 A shorter live session, 19 folds:
