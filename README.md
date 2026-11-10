@@ -184,7 +184,7 @@ We ran the counts on every chat log saved on one machine. There were 308 logs.
 ```
 5,503 fold operations removed 68,255,718 tokens net.
 The next requests had to re-read 217,133,383 tokens.
-88.2% of folds cost at least as much as they saved.
+88.1% of folds cost at least as much as they saved.
 96 of 118 chats ended up worse off than if they had never folded.
 0 pieces of chat vanished without a fold saying it was gone.
 ```
