@@ -426,6 +426,23 @@ export function apply(ctx, config) {
       const ledger = state.folds.map((fold) => scoreFold(fold, state.usageRecords, threshold));
       const coverage = coverageReport(session);
 
+      // Several folds can precede the same request. Charging every one of them
+      // the whole request's re-prefill inflates the count: ten folds sharing one
+      // request would each be billed 100% of it. Split the cost across the folds
+      // that share the request, and judge "nested" on that share.
+      const groupMembers = new Map();
+      for (const fold of ledger) {
+        if (fold.cacheRequestSeq === null) continue;
+        groupMembers.set(fold.cacheRequestSeq, (groupMembers.get(fold.cacheRequestSeq) ?? 0) + 1);
+      }
+      for (const fold of ledger) {
+        if (fold.cacheRequestSeq === null) continue;
+        const n = groupMembers.get(fold.cacheRequestSeq) ?? 1;
+        fold.sharedCost = n > 1 ? Math.floor(fold.cacheCost / n) : fold.cacheCost;
+        fold.sharedWith = n;
+        fold.nested = fold.sharedCost >= fold.netSaving * threshold;
+      }
+
       let totalSaving = 0;
       let perFoldCacheCost = 0;
       let costKnown = 0;
@@ -440,8 +457,7 @@ export function apply(ctx, config) {
           if (fold.nested) nested += 1;
         }
       }
-      // Several folds can precede the same request; counting each fold's share
-      // of one request double-counts it, so the distinct total is the honest one.
+      // Distinct total: one request is counted once however many folds preceded it.
       const distinctCacheCost = [...distinctCache.values()].reduce((sum, cost) => sum + cost, 0);
 
       const summary = state.foldCount === 0
