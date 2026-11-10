@@ -7,11 +7,12 @@
  * does, folds the plugin's projection over it, and reports per-session and
  * corpus-wide numbers.
  *
- *   node scripts/corpus-audit.mjs --sessions /home/matt/.dsh/sessions --report results/corpus.json
+ *   node scripts/corpus-audit.mjs --sessions "$HOME/.dsh/sessions" --report results/corpus.json
  *
  * Requires `unzstd` on PATH.
  */
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { apply, Config } from "../dsh-plugin/index.js";
@@ -21,7 +22,9 @@ function arg(name, def) {
   return i >= 0 && process.argv[i + 1] ? process.argv[i + 1] : def;
 }
 
-const sessionsRoot = arg("sessions", "/home/matt/.dsh/sessions");
+// Default is DSH's own session directory for the current user, not a
+// hardcoded home path, so the script works on anyone's machine.
+const sessionsRoot = arg("sessions", path.join(process.env.HOME ?? "", ".dsh", "sessions"));
 const reportPath = arg("report", "");
 
 /** The harness's own fixed-density estimator, copied so the stub matches the Host. */
@@ -143,8 +146,10 @@ async function auditOne(file) {
   }
 
   return {
-    file,
-    sessionId: header.id,
+    // No absolute paths and no raw session ids: this script is meant to run on
+    // someone else's machine and its output may be committed. A stable short
+    // hash is enough to identify a session without exposing its home directory.
+    ref: createHash("sha256").update(file).digest("hex").slice(0, 10),
     events: events.length,
     folds: result.netSaving.folds,
     shadowedNodes: result.coverage.surfaceNodesShadowedByFolds,
@@ -208,7 +213,7 @@ console.log(`surface nodes removed with no fold claiming them: ${sum(withFolds, 
 if (reportPath) {
   fs.writeFileSync(reportPath, JSON.stringify({
     generated: new Date().toISOString(),
-    sessionsRoot,
+    sessionsRootLabel: path.basename(sessionsRoot),
     counts: {
       logsFound: files.length,
       audited: audited.length,
